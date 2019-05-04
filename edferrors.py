@@ -36,13 +36,11 @@ class SellingDataError(EdfError):
     pass
     
 class RoomError(EdfError):
-    def __init__(self, message, level=logging.INFO, node=None, room=None, messages=None):
-        super().__init__(message, level=level, node=node, messages=messages)
-        self.room = room
+    pass
         
-class OccupancyError(RoomError):
+class OccupancyError(EdfError):
     pass
     
-class ChargeBlockError(RoomError):
+class ChargeBlockError(EdfError):
     pass
 

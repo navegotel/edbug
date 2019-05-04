@@ -14,7 +14,7 @@ from zipfile import ZipFile, BadZipFile
 from edferrors import HotelEdfError, AllotmentEdfError, BasicDataError, SellingDataError, ChargeBlockError, OccupancyError, RoomError
 from edfns import ns
 
-__version__ = "1.1.0"
+__version__ = "1.1.2"
 
 class Progressbar(object):
     def __init__(self, maxval, width=50, show_percent=True, barchar='»'):
@@ -153,7 +153,25 @@ def iterate(workdir=None):
                     logging.warning("Filename {0} does not match naming convention. Should be {1}".format(filename, correctfilename))
             for function in functions:
                 try:
-                    function[1](hotelroot, allotmentroot)
+                    if function[0].startswith("hotel"):
+                        function[1](hotelroot)
+                    elif function[0].startswith("allotment"):
+                        function[1](allotmentroot)
+                    elif function[0].startswith("room"):
+                        for roomnode in hotelroot.findall("edf:SellingData/edf:Rooms/edf:Room", ns):
+                            roomcode = roomnode.get("Code")
+                            try:
+                                function[1](roomnode)
+                            except RoomError as e:
+                                log_exception(e, "in room {0} of HotelEDF {1}:".format(roomcode, fqn), counters)
+                            except ChargeBlockError as e:
+                                log_exception(e, "in ChargeBlock in Room {0} of HotelEDF {1}:".format(roomcode, fqn), counters)
+                            except OccupancyError as e:
+                                log_exception(e, "in Occupancy in Room {0} of HotelEDF {1}:".format(roomcode, fqn).format(e.room, fqn), counters)
+                            except (HotelEdfError, AllotmentEdfError, SellingDataError):
+                                pass
+                    else:
+                        function[1](hotelroot, allotmentroot)
                 except HotelEdfError as e:
                     log_exception(e, "in HotelEDF {0}:".format(fqn), counters)
                 except AllotmentEdfError as e:
