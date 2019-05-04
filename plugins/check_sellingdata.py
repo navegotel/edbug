@@ -155,7 +155,6 @@ def check_seasondefinition(hotelrootnode, allotmentrootnode):
     if startdate < datetime.date.today():
         raise SellingDataError("Start date is in the past. You should only include data with date >= today", node=seasondefsnode, level=logging.WARNING)
     
-    
 
 def check_rooms(hotelrootnode, allotmentrootnode):
     roomnodes = hotelrootnode.findall("edf:SellingData/edf:Rooms/edf:Room", ns)
