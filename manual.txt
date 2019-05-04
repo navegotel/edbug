@@ -1,0 +1,138 @@
+Edbug Manual
+============
+
+Edbug is a coherence checker / debugger for Peakwork's EDF format.
+It is written in Python 3 and has no other dependencies. 
+
+Usage
+-----
+
+The simplest use is
+
+    edbug.py -Z /path/to/edf.zip
+or
+    edbug.py --zipfile /path/to/edf.zip
+
+This will unpack the data into a folder (tmp in install dir by default,
+so make sure the script has write permissions),
+runs some basic checks and then runs all tests.
+
+If you re-run edbug.py without params it will run the same check over 
+the previously unpacked data.
+
+If you re-run edbug.py -Z /path/to/edf.zip a previously existing
+workdir and all its content will be deleted to make sure that no
+old data gets mixed with the new files.
+
+You possibly want to unpack the data into another folder. In this
+case you can specify the folder with the -F (or --folder) switch:
+
+    edbug.py -Z /path/to/edf.zip -F /path/to/workdir
+
+If you already have unpacked data on your computer, you just need to
+leave out the -Z switch:
+
+edbug.py -F /path/to/workdir
+
+The debug output is written to a file, by default 'report_%Y-%m-%d.txt'
+where %Y-%m-%d stands for the current (ISOformat) date. You can 
+specify your own report file with the -L (or --logfile) switch;
+
+    edbug.py -Z /path/to/edf.zip -L /path/to/my_report.txt
+
+edbug uses pythons standard logging module, messages are classified
+into loglevels:
+
+CRITICAL: This is so wrong, the debugger cannot continue to work. 
+          Example: wrong file structure.
+ERROR:    This will cause the Hotel or Room to not show up, missing 
+          required elements or attributes or anything which is so
+          wrong that it deserves more than a warning.
+WARNING:  Anything which is not strictly wrong but which goes against 
+          good practice in EDF or just does not make much sense.
+          These are usually frowned upon by Peakwork in acceptance 
+          testing and may lead to rejection of certification, 
+          depending on the project manager.
+          Example: if there is no Language="**" in none of the room 
+          descriptions ("**" marks a description a fallback)
+INFO:     Anything which is formally correct but may be done in a 
+          better way. Can also be applied for elements which are 
+          in the XSD but currently not implemented or to just throw 
+          useful information at anyone willing to read the report file.
+DEBUG:    Only used for outputting data during plugin development.
+          This is not useful for EDF debugging.
+
+You can control what you want to have in your report by specifying 
+the level with the -LL (or --loglevel) switch. With 
+
+    edbug.py -Z /path/to/edf.zip -LL ERROR
+
+you will only get actual errors. If you set -LL WARNING you will get 
+warnings and errors. If you set -LL INFO you will get infos, warnings
+and errors (lower log levels include all levels above).
+
+CAUTION: The decision if a certain condition is reported as a 
+warning or as an error is sometimes difficult and may depend on the
+amount of sleep the plugin developer got the previous night. So even
+if you are only interested in the important stuff, it is always a good
+idea to set level at least to WARNING. If now level is specified
+INFO is used.
+
+By default, output is appended to existing reports. This way you can
+open the file with tail -f and watch the messages fly by as you work.
+If you want to create new files (or override existing ones), you can
+set the -LM (or --logmode) switch. with -LM a messages are appended
+(default behaviour) and with -LM w the report starts with a clean file.
+
+In some cases you may want to remove the unpacked data after debugging.
+For this purpose you just add the -CU (or --cleanup) switch:
+
+    edbug.py -Z /path/to/edf.zip -CU
+    
+If you run
+
+    edbug.py --help
+    
+you will get the following output:
+------------------------------------------------------------------------
+usage: edbug.py [-h] [-Z ZIPFILE] [-F FOLDER] [-L LOGFILE]
+                [-LL {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [-LM {a,w}] [-CU]
+
+a debugger for Peakwork HotelEDF data deliveries
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -Z ZIPFILE, --zipfile ZIPFILE
+                        Name of the EDF zip file
+  -F FOLDER, --folder FOLDER
+                        Folder with EDF files. if -Z option is used the file
+                        is unpacked into this folder. If the folder exists it
+                        will be removed with all its contents previously
+  -L LOGFILE, --logfile LOGFILE
+                        Name of the Log file debug messages are written to
+  -LL {DEBUG,INFO,WARNING,ERROR,CRITICAL}, --loglevel {DEBUG,INFO,WARNING,ERROR,CRITICAL}
+                        Only messages with this level or higher are logged to
+                        the report.
+  -LM {a,w}, --logmode {a,w}
+                        a for appending to existing file, w for overriding an
+                        existing file.
+  -CU, --cleanup        delete work directory at the end.
+------------------------------------------------------------------------
+
+Plug-ins
+-------
+Edbug only does some very basic checking itself and then runs all
+checks that are provided as plug-ins. These plug-ins are python modules
+whose name starts with "check" and which are placed into the plugins
+folder.
+
+The check_sellingdata.py module is meant as a reference implementation,
+contains all documentation required for plugin development.
+
+CAUTION: a faulty plugin may f**k up the whole edbug run, so please take
+some care. Just make sure you don't call methods on None or similar
+and wrap things into try except else wherever things may go wrong. Easy
+stuff...
+
+You can de-activate any plug-in by renaming it so it does not start
+with "check" or does not end on ".py".
