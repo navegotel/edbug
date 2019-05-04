@@ -145,16 +145,15 @@ def check_seasondefinition(hotelrootnode, allotmentrootnode):
     try:
         enddate = datetime.datetime.strptime(end, "%Y-%m-%d").date()
     except (ValueError, TypeError):
-        raise SellingDataError("Value for Start must be a date in ISO format", node=allotmentnode, level=logging.ERROR))
+        raise SellingDataError("Value for Start must be a date in ISO format", node=allotmentnode, level=logging.ERROR)
     if enddate < datetime.date.today():
         raise SellingDataError("End date is in the past, the EDF is outdated", node=seasondefsnode, level=logging.ERROR)
     try:
         startdate = datetime.datetime.strptime(start, "%Y-%m-%d").date()
     except (ValueError, TypeError):
-        raise SellingDataError("Value for End must be a date in ISO format", node=allotmentnode, level=logging.ERROR))
+        raise SellingDataError("Value for End must be a date in ISO format", node=allotmentnode, level=logging.ERROR)
     if startdate < datetime.date.today():
         raise SellingDataError("Start date is in the past. You should only include data with date >= today", node=seasondefsnode, level=logging.WARNING)
-    
 
 def check_rooms(hotelrootnode, allotmentrootnode):
     roomnodes = hotelrootnode.findall("edf:SellingData/edf:Rooms/edf:Room", ns)

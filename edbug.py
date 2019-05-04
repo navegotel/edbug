@@ -11,7 +11,7 @@ import shutil
 import xml.etree.ElementTree as ET
 from inspect import getmembers, isfunction
 from zipfile import ZipFile, BadZipFile
-from edferrors import HotelEdfError, AllotmentEdfError, BasicDataError, SellingDataError, ChargeBlockError, OccupancyError
+from edferrors import HotelEdfError, AllotmentEdfError, BasicDataError, SellingDataError, ChargeBlockError, OccupancyError, RoomError
 from edfns import ns
 
 __version__ = "1.1.0"
@@ -162,6 +162,8 @@ def iterate(workdir=None):
                     log_exception(e, "in BasicData section of HotelEDF {0}:".format(fqn), counters)
                 except SellingDataError as e:
                     log_exception(e, "in SellingData section of HotelEDF {0}:".format(fqn), counters)
+                except RoomError as e:
+                    log_exception(e, "in the rooms of HotelEDF {0}:".format(fqn), counters)
                 except ChargeBlockError as e:
                     log_exception(e, "in ChargeBlock in Room {0} of HotelEDF {1}:".format(e.room, fqn), counters)
                 except OccupancyError as e:
