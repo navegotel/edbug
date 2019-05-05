@@ -87,7 +87,7 @@ def unpackzipfile(zipfilename, workdir=None):
             logging.critical("Wrong folder structure. No hotels/hotelonly/allotment found. Exiting")
             sys.exit()
 
-def log_exception(e, header, counters):
+def log_exception(e, header, counters, functionname, debug=False):
     highestlevel = logging.DEBUG
     for errormsg in e.messages:
         try:
@@ -97,12 +97,14 @@ def log_exception(e, header, counters):
         if errormsg.level > highestlevel:
             highestlevel = errormsg.level
     logging.log(highestlevel, header)
+    if debug is True:
+        logging.log(errormsg.level, "In function {0}:".format(functionname))
     for errormsg in e.messages:
         logging.log(errormsg.level, errormsg.message)
         if errormsg.snippet is not None:
             logging.log(errormsg.level, errormsg.snippet)
 
-def iterate(workdir=None):
+def iterate(workdir=None, debug=False):
     workdir = get_workdir(workdir)
     hotelonlydir = get_hotelonlydir(workdir)
     allotmentdir = get_allotmentdir(workdir)
@@ -163,29 +165,29 @@ def iterate(workdir=None):
                             try:
                                 function[1](roomnode)
                             except RoomError as e:
-                                log_exception(e, "in room {0} of HotelEDF {1}:".format(roomcode, fqn), counters)
+                                log_exception(e, "in room {0} of HotelEDF {1}:".format(roomcode, fqn), counters, function[0], debug=debug)
                             except ChargeBlockError as e:
-                                log_exception(e, "in ChargeBlock in Room {0} of HotelEDF {1}:".format(roomcode, fqn), counters)
+                                log_exception(e, "in ChargeBlock in Room {0} of HotelEDF {1}:".format(roomcode, fqn), counters, function[0], debug=debug)
                             except OccupancyError as e:
-                                log_exception(e, "in Occupancy in Room {0} of HotelEDF {1}:".format(roomcode, fqn).format(e.room, fqn), counters)
+                                log_exception(e, "in Occupancy in Room {0} of HotelEDF {1}:".format(roomcode, fqn).format(e.room, fqn), counters, function[0], debug=debug)
                             except (HotelEdfError, AllotmentEdfError, SellingDataError):
                                 pass
                     else:
                         function[1](hotelroot, allotmentroot)
                 except HotelEdfError as e:
-                    log_exception(e, "in HotelEDF {0}:".format(fqn), counters)
+                    log_exception(e, "in HotelEDF {0}:".format(fqn), counters, function[0], debug=debug)
                 except AllotmentEdfError as e:
-                    log_exception(e, "in AllotmentEDF {0}:".format(allotmentfilename), counters)
+                    log_exception(e, "in AllotmentEDF {0}:".format(allotmentfilename), counters, function[0], debug=debug)
                 except BasicDataError as e:
-                    log_exception(e, "in BasicData section of HotelEDF {0}:".format(fqn), counters)
+                    log_exception(e, "in BasicData section of HotelEDF {0}:".format(fqn), counters, function[0], debug=debug)
                 except SellingDataError as e:
-                    log_exception(e, "in SellingData section of HotelEDF {0}:".format(fqn), counters)
+                    log_exception(e, "in SellingData section of HotelEDF {0}:".format(fqn), counters, function[0], debug=debug)
                 except RoomError as e:
-                    log_exception(e, "in the rooms of HotelEDF {0}:".format(fqn), counters)
+                    log_exception(e, "in the rooms of HotelEDF {0}:".format(fqn), counters, function[0], debug=debug)
                 except ChargeBlockError as e:
-                    log_exception(e, "in ChargeBlock in Room {0} of HotelEDF {1}:".format(e.room, fqn), counters)
+                    log_exception(e, "in ChargeBlock in Room {0} of HotelEDF {1}:".format(e.room, fqn), counters, function[0], debug=debug)
                 except OccupancyError as e:
-                    log_exception(e, "in Occupancy in Room {0} of HotelEDF {1}:".format(e.room, fqn).format(e.room, fqn), counters)
+                    log_exception(e, "in Occupancy in Room {0} of HotelEDF {1}:".format(e.room, fqn).format(e.room, fqn), counters, function[0], debug=debug)
     for key, value in counters.items():
         logging.info("{0}: {1}".format(key, value))
                         
@@ -207,6 +209,7 @@ if __name__ == '__main__':
     ap.add_argument('-LL', '--loglevel', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], default="INFO", help='Only messages with this level or higher are logged to the report.')
     ap.add_argument('-LM', '--logmode', choices=['a', 'w'], default='a', help='a for appending to existing file, w for overriding an existing file.')
     ap.add_argument('-CU', '--cleanup', action='store_true', help="delete work directory at the end.")
+    ap.add_argument('-DG', '--debug', action='store_true', help="Log additional debug information. This currently only logs the the name of the function that raised the error.")
     args = ap.parse_args()
     numeric_level = getattr(logging, args.loglevel.upper(), None)
     logformat = '%(asctime)s %(levelname)-8s %(message)s'
@@ -216,7 +219,7 @@ if __name__ == '__main__':
     if args.zipfile is not None:
         cleanup(args.folder)
         unpackzipfile(args.zipfile, workdir=args.folder)
-    iterate(workdir=args.folder)
+    iterate(workdir=args.folder, debug=args.debug)
     if args.cleanup is True:
         cleanup(args.folder)
     
