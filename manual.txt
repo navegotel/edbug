@@ -97,6 +97,7 @@ you will get the following output:
 ------------------------------------------------------------------------
 usage: edbug.py [-h] [-Z ZIPFILE] [-F FOLDER] [-L LOGFILE]
                 [-LL {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [-LM {a,w}] [-CU]
+                [-DG]
 
 a debugger for Peakwork HotelEDF data deliveries
 
@@ -117,6 +118,10 @@ optional arguments:
                         a for appending to existing file, w for overriding an
                         existing file.
   -CU, --cleanup        delete work directory at the end.
+  -DG, --debug          Log additional debug information. This currently only
+                        logs the the name of the function that raised the
+                        error.
+
 ------------------------------------------------------------------------
 
 Plug-ins
@@ -129,7 +134,7 @@ folder.
 The documentation for development of plug-ings has been moved to
 plugin_manual.txt
 
-CAUTION: a faulty plugin may f**k up the whole edbug run, so please take
+CAUTION: a faulty plugin may screw up the whole edbug run, so please take
 some care. Just make sure you don't call methods on None or similar
 and please wrap things into "try except else" wherever things may go 
 wrong. Easy stuff...

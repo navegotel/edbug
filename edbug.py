@@ -169,7 +169,7 @@ def iterate(workdir=None, debug=False):
                             except ChargeBlockError as e:
                                 log_exception(e, "in ChargeBlock in Room {0} of HotelEDF {1}:".format(roomcode, fqn), counters, function[0], debug=debug)
                             except OccupancyError as e:
-                                log_exception(e, "in Occupancy in Room {0} of HotelEDF {1}:".format(roomcode, fqn).format(e.room, fqn), counters, function[0], debug=debug)
+                                log_exception(e, "in Occupancy in Room {0} of HotelEDF {1}:".format(roomcode, fqn), counters, function[0], debug=debug)
                             except (HotelEdfError, AllotmentEdfError, SellingDataError):
                                 pass
                     else:
