@@ -14,7 +14,7 @@ from zipfile import ZipFile, BadZipFile
 from edferrors import HotelEdfError, AllotmentEdfError, BasicDataError, SellingDataError, ChargeBlockError, OccupancyError, RoomError
 from edfns import ns
 
-__version__ = "1.2.0"
+__version__ = "1.2.1"
 
 class Progressbar(object):
     def __init__(self, maxval, width=50, show_percent=True, barchar='»'):

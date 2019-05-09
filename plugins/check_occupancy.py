@@ -101,8 +101,43 @@ def room_checkoccupancies(roomnode):
             except ValueError:
                 errormsgs.append(ErrorMsg("The value for MinChargedPersons must be an unsigned integer", node=occupancynode, level=logging.ERROR))
                 
-        if occupancynode.find("edf:Children", ns) is None:
+        childrennode = occupancynode.find("edf:Children", ns)
+        if childrennode is None:
             errormsgs.append(ErrorMsg("Occupancy must contain a Children element", node=occupancynode, level=logging.ERROR))
+        else:
+            minage = childrennode.get("MinAge")
+            if minage is None:
+                errormsgs.append(ErrorMsg("Children element has no MinAge attribute", node=childrennode, level=logging.ERROR))
+            elif len(minage) == 0:
+                errormsgs.append(ErrorMsg("MinAge attribute cannot be empty", node=childrennode, level=logging.ERROR))
+            else:
+                try:
+                    int(minage)
+                except ValueError:
+                    errormsgs.append(ErrorMsg("MinAge attribute value must be an unsigned integer", node=childrennode, level=logging.ERROR))
+            maxage = childrennode.get("MaxAge")
+            if minage is None:
+                errormsgs.append(ErrorMsg("Children element has no MaxAge attribute", node=childrennode, level=logging.ERROR))
+            elif len(maxage) == 0:
+                errormsgs.append(ErrorMsg("MaxAge attribute cannot be empty", node=childrennode, level=logging.ERROR))
+            else:
+                try:
+                    int(maxage)
+                except ValueError:
+                    errormsgs.append(ErrorMsg("MaxAge attribute value must be an unsigned integer", node=childrennode, level=logging.ERROR))
+        
+        infantsnode = occupancynode.find("edf:Infants", ns)
+        if infantsnode is None:
+            errormsgs.append(ErrorMsg("No Infants element in the Occupancy means there are no restriction on Infants and they will not be counted in the occupancy", node=infantsnode, level=logging.WARNING))
+        else:
+            applytooccupancy = infantsnode.get('ApplyToOccupancy')
+            if applytooccupancy is None: 
+                errormsgs.append(ErrorMsg("Missing ApplyToOccupancy attribute, the number of allowed infants is not restricted by the Min/Max values of the Occupancy element", node=infantsnode, level=logging.INFO))
+            elif len(applytooccupancy) == 0:
+                errormsgs.append(ErrorMsg("ApplyToOccupancy attribute cannot be empty", node=infantsnode, level=logging.ERROR))
+            elif applytooccupancy not in ['No', 'Min', 'Max', 'Yes']:
+                errormsgs.append(ErrorMsg("Value of ApplyToOccupancy attribute must be one of 'No', 'Min', 'Max', 'Yes'", node=infantsnode, level=logging.ERROR))
+                
             
     if len(errormsgs) > 0:
         raise OccupancyError("There are errors in one or more Occupancy elements", messages = errormsgs)
