@@ -9,6 +9,8 @@ def room_checkoccupancies(roomnode):
         raise OccupancyError("Occupancies element is mandatory", level=logging.ERROR)
     errormsgs = list()
     occupancynodes = occupanciesnode.findall("edf:Occupancy", ns)
+    if len(occupancynodes) == 0:
+        raise OccupancyError("Occupancies element must contain at least one Occupancy element", level=logging.ERROR)
     if len(occupancynodes) > 4:
         errormsgs.append(ErrorMsg("Only a maximum of 4 Occupancy elements are allowed", node=occupanciesnode, level=logging.ERROR))
     for occupancynode in occupancynodes:
