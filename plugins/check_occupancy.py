@@ -118,7 +118,7 @@ def room_checkoccupancies(roomnode):
                 except ValueError:
                     errormsgs.append(ErrorMsg("MinAge attribute value must be an unsigned integer", node=childrennode, level=logging.ERROR))
             maxage = childrennode.get("MaxAge")
-            if minage is None:
+            if maxage is None:
                 errormsgs.append(ErrorMsg("Children element has no MaxAge attribute", node=childrennode, level=logging.ERROR))
             elif len(maxage) == 0:
                 errormsgs.append(ErrorMsg("MaxAge attribute cannot be empty", node=childrennode, level=logging.ERROR))
